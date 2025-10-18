@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Let's Meet Us 💬</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #ffe5b4, #ffc0cb);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      color: #333;
+      text-align: center;
+    }
+    .container {
+      background: #fff;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 500px;
+    }
+    h1 {
+      color: #ff5c8d;
+    }
+    button {
+      background-color: #ff5c8d;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background-color: #ff3c6d;
+    }
+    .hidden {
+      display: none;
+    }
+    .question {
+      font-size: 1.2rem;
+      margin: 20px 0;
+    }
+    input[type="text"], input[type="number"] {
+      padding: 10px;
+      margin: 10px 0;
+      width: 80%;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="intro">
+      <h1>Let's Meet Us 💬</h1>
+      <p>Conozcámonos, responde las preguntas rápido y sin pensar tanto.</p>
+      <input type="text" id="nombre" placeholder="Tu nombre" required /><br />
+      <input type="number" id="edad" placeholder="Tu edad" required /><br />
+      <button onclick="startQuiz()">Comenzar</button>
+    </div>
+
+    <div id="quiz" class="hidden">
+      <p id="question" class="question"></p>
+      <div id="options"></div>
+    </div>
+
+    <div id="final" class="hidden">
+      <h2>¡Listo! 🎉</h2>
+      <p>Descarga tus resultados:</p>
+      <button onclick="downloadResults()">Descargar resultados</button>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      "¿Café o siesta? ☕😴",
+      "¿Mensajes o llamadas?",
+      "¿Bailar o cantar (mal)?",
+      "¿Gatos o perros pero versión quién dominaría el mundo?",
+      "¿Ver una peli o hacer el drama tú mismo? 🎭"
+    ];
+
+    let currentQuestion = 0;
+    let answers = [];
+    let player = {};
+
+    function startQuiz() {
+      const nombre = document.getElementById("nombre").value.trim();
+      const edad = document.getElementById("edad").value.trim();
+      if (!nombre || !edad) {
+        alert("Por favor, completa tu nombre y edad.");
+        return;
+      }
+      player = { nombre, edad };
+      document.getElementById("intro").classList.add("hidden");
+      document.getElementById("quiz").classList.remove("hidden");
+      showQuestion();
+    }
+
+    function showQuestion() {
+      if (currentQuestion >= questions.length) {
+        document.getElementById("quiz").classList.add("hidden");
+        document.getElementById("final").classList.remove("hidden");
+        return;
+      }
+
+      const questionEl = document.getElementById("question");
+      questionEl.textContent = questions[currentQuestion];
+
+      // Limpiar opciones previas
+      const optionsEl = document.getElementById("options");
+      optionsEl.innerHTML = `
+        <input type="text" id="answerInput" placeholder="Tu respuesta rápida..." autofocus />
+      `;
+
+      const answerInput = document.getElementById("answerInput");
+
+      // Esperar máximo 2 segundos para la respuesta
+      let answered = false;
+      answerInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !answered) {
+          answered = true;
+          answers.push(answerInput.value || "(Sin respuesta)");
+          nextQuestion();
+        }
+      });
+
+      setTimeout(() => {
+        if (!answered) {
+          answered = true;
+          answers.push(answerInput.value || "(Sin respuesta)");
+          nextQuestion();
+        }
+      }, 2000);
+    }
+
+    function nextQuestion() {
+      currentQuestion++;
+      showQuestion();
+    }
+
+    function downloadResults() {
+      const text = `
+Aquí tienes la recopilación de respuestas de ${player.nombre}, ¡Ahora sabes qué invitarle o qué podría gustarle para su próximo cumpleaños! 🎁
+
+Edad: ${player.edad} años
+----------------------------------
+${questions.map((q, i) => `${q}\n➡ ${answers[i] || "(Sin respuesta)"}\n`).join("\n")}
+      `;
+      const blob = new Blob([text], { type: "text/plain" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `Respuestas_${player.nombre}.txt`;
+      link.click();
+    }
+  </script>
+</body>
+</html>
